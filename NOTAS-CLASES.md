@@ -63,14 +63,21 @@ Estado: `[ ]` pendiente de explicar · `[x]` explicada.
 
 ### Servicios (`services/`)
 - [ ] `PresentationService.java` — interfaz: findAll, findById, create, deleteById.
-- [ ] `PresentationServiceImpl.java` — (ya creada) implementación `@Service`; `PresentationRepository` por constructor; `@Transactional` (readOnly en lecturas).
+- [ ] `PresentationServiceImpl.java` — (ya creada) implementación `@Service`; `PresentationRepository` por constructor; `@Transactional` (readOnly en lecturas); lanza `EntityNotFoundException`.
 - [ ] `ProductService.java` — (ya creada) interfaz: `Page<ProductResponseDto> findAll(Pageable)` + findById/create/deleteById.
 - [ ] `ProductServiceImpl.java` — (ya creada) `@Service`; `ProductRepository` + `PresentationRepository`; mapeo anidado y `page.map(...)`; `@Transactional`.
 
+### Controladores (`controllers/`)
+- [ ] `ProductController.java` — (ya creada) `@RestController` en `/api/products`; paginación con `@PageableDefault(size = 20, sort = "name", ASC)`; GET lista, GET por id, POST (201), DELETE (204).
+- [ ] `PresentationController.java` — (ya creada) `@RestController` en `/api/presentations`; sin paginación; GET lista, GET por id, POST (201), DELETE (204).
+
+### Excepciones (`exceptions/`)
+- [ ] `GlobalExceptionHandler.java` — (ya creada) `@RestControllerAdvice`; convierte `EntityNotFoundException` → **404** con `{"error": "..."}`.
+
 ### Pendientes / por revisar
-- [ ] No existe capa de controladores (`controllers/`) todavía.
-- [ ] En el futuro `ProductController`: aplicar `@PageableDefault(size = 20, sort = "name", direction = ASC)`.
-- [ ] Manejo de `EntityNotFoundException` → 404 (p. ej. `@RestControllerAdvice`).
+- [ ] Pruebas de integración (**opción C**): configurar MySQL en `application.properties` + probar los endpoints con `curl`/Postman.
+- [ ] (Opcional) Pruebas `@WebMvcTest` de los controladores (no necesitan base de datos).
+- [ ] (Opcional) `PresentationRequestDto` con `@NotBlank` para validar la creación de presentaciones.
 
 > Actualizar esta sección según avance el refactor.
 
@@ -81,7 +88,10 @@ Estado: `[ ]` pendiente de explicar · `[x]` explicada.
 - **Paginación solo en productos** (Opción A): `ProductService.findAll(Pageable)`. El orden viaja dentro del `Pageable` (`Sort`), no fijado en la query.
 - Se eliminó del repositorio `findAllWithPresentation()` (el `List` con `ORDER BY p.name ASC` fijo), que quedaba sin uso.
 - `PresentationService.findAll()` se mantiene sin paginar (devuelve `List`).
-- Excepciones de "no encontrado": `EntityNotFoundException` (`jakarta.persistence`) en `ProductServiceImpl`.
+- Excepciones de "no encontrado": `EntityNotFoundException` (`jakarta.persistence`) tanto en `ProductServiceImpl` como en `PresentationServiceImpl`.
+- El `@RestControllerAdvice` vive en el paquete **`exceptions/`** (no en `controllers/`), para separar el manejo de errores.
+- Rutas base: `/api/products` y `/api/presentations`.
+- `ProductController.create` lleva `@Valid` (el `ProductRequestDto` tiene validaciones); `PresentationController.create` no, porque `PresentationResponseDto` no tiene restricciones.
 
 ---
 
@@ -93,6 +103,7 @@ Estado: `[ ]` pendiente de explicar · `[x]` explicada.
 | 2026-10-18 | `PresentationServiceImpl` | Creada y compilando (`mvn compile` → BUILD SUCCESS); `@Transactional` añadido. Pendiente de explicar. |
 | 2026-10-18 | `ProductService` + `ProductServiceImpl` | Creadas y compilando. Interfaz con paginación (Opción A); repositorio limpiado. Pendiente de explicar. |
 | 2026-10-19 | (notas) | Corregida la ruta del proyecto a `/home/dtgonzalez/git/demo-refactorizado` y re-formateado el archivo. |
+| 2026-10-19 | `ProductController` + `PresentationController` + `GlobalExceptionHandler` | Creadas y compilando. `PresentationServiceImpl` alineado a `EntityNotFoundException`. Commits `01fed75` y `5bc927b`. Pendiente de explicar. |
 
 ---
 
@@ -100,8 +111,8 @@ Estado: `[ ]` pendiente de explicar · `[x]` explicada.
 
 > _(Anotar aquí la clase con la que se continuará la próxima vez.)_
 
-- [ ] Clase: `ProductServiceImpl`
-- Notas previas: siguiente hito = capa de controladores (`controllers/`); allí va `@PageableDefault`.
+- [ ] Clase: `ProductController` (o la capa de controladores en general)
+- Notas previas: siguiente hito = **pruebas de integración (opción C)**: configurar MySQL + probar con `curl`.
 
 ---
 
