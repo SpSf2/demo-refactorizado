@@ -10,7 +10,7 @@ Sirve para mantener la secuencia entre días aunque se cambie de sesión o de eq
 1. Abrir la terminal en esta carpeta:
 
    ```bash
-   cd ~/Documentos/JavaProjects/ApiRest/demo-refactorizado
+   cd /home/dtgonzalez/git/demo-refactorizado
    opencode
    ```
 
@@ -43,12 +43,13 @@ anotaciones, tipos y nombres de variable.
 ## Inventario de clases
 
 Estado: `[ ]` pendiente de explicar · `[x]` explicada.
+(Entre paréntesis, si la clase ya existe en el repo.)
 
 ### Raíz
 - [ ] `src/main/java/com/example/DemoRefactorizadoApplication.java` — clase principal de arranque de Spring Boot.
 
 ### Entidades (`entities/`)
-- [ ] `Product.java` — entidad JPA `products`; relación `@ManyToOne` con `Presentation`.
+- [ ] `Product.java` — entidad JPA `products`; relación `@ManyToOne` (LAZY) con `Presentation`.
 - [ ] `Presentation.java` — entidad JPA `presentations`.
 
 ### DTOs (`dtos/`)
@@ -57,18 +58,30 @@ Estado: `[ ]` pendiente de explicar · `[x]` explicada.
 - [ ] `PresentationResponseDto.java` — `record` de salida para presentación.
 
 ### Repositorios (`repositories/`)
-- [ ] `ProductRepository.java` — `JpaRepository` con consultas `@Query` (fetch de presentation, paginación).
+- [ ] `ProductRepository.java` — `JpaRepository` con `@Query` (`JOIN FETCH` de presentation) y paginación `Page`/`Pageable`.
 - [ ] `PresentationRepository.java` — `JpaRepository` básico.
 
 ### Servicios (`services/`)
-- [ ] `PresentationService.java` — interfaz de servicio (findAll, findById, create, deleteById).
+- [ ] `PresentationService.java` — interfaz: findAll, findById, create, deleteById.
+- [ ] `PresentationServiceImpl.java` — (ya creada) implementación `@Service`; `PresentationRepository` por constructor; `@Transactional` (readOnly en lecturas).
+- [ ] `ProductService.java` — (ya creada) interfaz: `Page<ProductResponseDto> findAll(Pageable)` + findById/create/deleteById.
+- [ ] `ProductServiceImpl.java` — (ya creada) `@Service`; `ProductRepository` + `PresentationRepository`; mapeo anidado y `page.map(...)`; `@Transactional`.
 
 ### Pendientes / por revisar
-- [ ] No existe `PresentationServiceImpl` (aún).
-- [ ] No existe `ProductService`/`ProductServiceImpl` (aún).
 - [ ] No existe capa de controladores (`controllers/`) todavía.
+- [ ] En el futuro `ProductController`: aplicar `@PageableDefault(size = 20, sort = "name", direction = ASC)`.
+- [ ] Manejo de `EntityNotFoundException` → 404 (p. ej. `@RestControllerAdvice`).
 
 > Actualizar esta sección según avance el refactor.
+
+---
+
+## Decisiones de diseño
+
+- **Paginación solo en productos** (Opción A): `ProductService.findAll(Pageable)`. El orden viaja dentro del `Pageable` (`Sort`), no fijado en la query.
+- Se eliminó del repositorio `findAllWithPresentation()` (el `List` con `ORDER BY p.name ASC` fijo), que quedaba sin uso.
+- `PresentationService.findAll()` se mantiene sin paginar (devuelve `List`).
+- Excepciones de "no encontrado": `EntityNotFoundException` (`jakarta.persistence`) en `ProductServiceImpl`.
 
 ---
 
@@ -77,6 +90,9 @@ Estado: `[ ]` pendiente de explicar · `[x]` explicada.
 | Fecha | Clase explicada | Punto donde quedamos / pendientes |
 |-------|-----------------|-----------------------------------|
 | 2026-10-09 | (sin empezar) | Sesión creada y movida al proyecto; formato acordado. |
+| 2026-10-18 | `PresentationServiceImpl` | Creada y compilando (`mvn compile` → BUILD SUCCESS); `@Transactional` añadido. Pendiente de explicar. |
+| 2026-10-18 | `ProductService` + `ProductServiceImpl` | Creadas y compilando. Interfaz con paginación (Opción A); repositorio limpiado. Pendiente de explicar. |
+| 2026-10-19 | (notas) | Corregida la ruta del proyecto a `/home/dtgonzalez/git/demo-refactorizado` y re-formateado el archivo. |
 
 ---
 
@@ -84,5 +100,28 @@ Estado: `[ ]` pendiente de explicar · `[x]` explicada.
 
 > _(Anotar aquí la clase con la que se continuará la próxima vez.)_
 
-- [ ] Clase: `...`
-- Notas previas:
+- [ ] Clase: `ProductServiceImpl`
+- Notas previas: siguiente hito = capa de controladores (`controllers/`); allí va `@PageableDefault`.
+
+---
+
+## Cómo actualizar este archivo (procedimiento)
+
+1. El agente escribe la versión nueva en:
+
+   ```
+   /home/dtgonzalez/.opencode/plan/NOTAS-CLASES.md
+   ```
+
+2. Copiarla encima de la del proyecto:
+
+   ```bash
+   cp /home/dtgonzalez/.opencode/plan/NOTAS-CLASES.md \
+      /home/dtgonzalez/git/demo-refactorizado/NOTAS-CLASES.md
+   ```
+
+3. Verificar que quedó bien (opcional):
+
+   ```bash
+   git -C /home/dtgonzalez/git/demo-refactorizado diff -- NOTAS-CLASES.md
+   ```
