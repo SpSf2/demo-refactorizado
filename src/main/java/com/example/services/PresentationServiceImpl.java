@@ -1,5 +1,6 @@
 package com.example.services;
 
+import com.example.dtos.PresentationRequestDto;
 import com.example.dtos.PresentationResponseDto;
 import com.example.entities.Presentation;
 import com.example.repositories.PresentationRepository;
@@ -44,7 +45,7 @@ public class PresentationServiceImpl implements PresentationService {
 
     @Override
     @Transactional
-    public PresentationResponseDto create(PresentationResponseDto request) {
+    public PresentationResponseDto create(PresentationRequestDto request) {
         Presentation presentation = new Presentation();
         presentation.setName(request.name());
         Presentation savedPresentation = presentationRepository.save(presentation);

@@ -1,8 +1,10 @@
 package com.example.controllers;
 
+import com.example.dtos.PresentationRequestDto;
 import com.example.dtos.PresentationResponseDto;
 import com.example.services.PresentationService;
 import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +38,7 @@ public class PresentationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PresentationResponseDto create(@RequestBody PresentationResponseDto request) {
+    public PresentationResponseDto create(@Valid @RequestBody PresentationRequestDto request) {
         return presentationService.create(request);
     }
 
