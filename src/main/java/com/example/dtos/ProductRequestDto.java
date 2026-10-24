@@ -24,8 +24,6 @@ public record ProductRequestDto(
     @Positive(message = "El precio debe ser un número positivo")
     BigDecimal price,
 
-    String productImage,
-
     @NotNull(message = "El id de la presentación es obligatorio")
     Long presentationId
 ) {}

@@ -9,7 +9,7 @@ import com.example.repositories.PresentationRepository;
 import com.example.repositories.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,11 +19,14 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final PresentationRepository presentationRepository;
+    private final ImageStorageService imageStorageService;
 
     public ProductServiceImpl(ProductRepository productRepository,
-                              PresentationRepository presentationRepository) {
+                              PresentationRepository presentationRepository,
+                                ImageStorageService imageStorageService) {
         this.productRepository = productRepository;
         this.presentationRepository = presentationRepository;
+        this.imageStorageService = imageStorageService;
     }
 
     @Override
@@ -54,11 +57,31 @@ public class ProductServiceImpl implements ProductService {
                 .description(request.description())
                 .stock(request.stock())
                 .price(request.price())
-                .productImage(request.productImage())
                 .presentation(presentation)
                 .build();
 
         Product saved = productRepository.save(product);
+        return toDto(saved);
+    }
+
+    @Override
+    @Transactional
+    public ProductResponseDto updateImage(Long id, MultipartFile file) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Product not found with id: " + id));
+
+        String oldImage = product.getProductImage();
+
+        String storedFilename = imageStorageService.store(file);
+        product.setProductImage(storedFilename);
+
+        Product saved = productRepository.save(product);
+
+        if (oldImage != null && !oldImage.isBlank()) {
+            imageStorageService.delete(oldImage);
+        }
+
         return toDto(saved);
     }
 

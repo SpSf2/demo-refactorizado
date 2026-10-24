@@ -2,6 +2,7 @@ package com.example.services;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.dtos.ProductRequestDto;
 import com.example.dtos.ProductResponseDto;
@@ -13,6 +14,8 @@ public interface ProductService {
     ProductResponseDto findById(Long id);
 
     ProductResponseDto create(ProductRequestDto request);
+
+    ProductResponseDto updateImage(Long id, MultipartFile file);
 
     void deleteById(Long id);
 }

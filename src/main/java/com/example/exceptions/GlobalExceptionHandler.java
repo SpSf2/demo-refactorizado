@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -37,6 +38,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleDataIntegrity(DataIntegrityViolationException ex) {
-        return Map.of("error", "No se puede completar la operación: hay datos relacionados que dependen de este registro");
+        return Map.of("error", "No se puede completar la operación: hay datos" +
+                             "relacionados que dependen de este registro");
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleIllegalArgument(IllegalArgumentException ex) {
+        return Map.of("error", ex.getMessage());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ResponseStatus(HttpStatus.CONTENT_TOO_LARGE)
+    public Map<String, String> handleMaxSize(MaxUploadSizeExceededException ex) {
+        return Map.of("error", "El archivo supera el tamaño máximo permitido (5MB)");
     }
 }
